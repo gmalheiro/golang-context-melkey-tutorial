@@ -7,7 +7,8 @@ import (
 )
 
 func main() {
-	exampleTimeout()
+	//exampleTimeout()
+	exampleWithValues()
 }
 
 func exampleTimeout() {
@@ -38,5 +39,20 @@ func exampleTimeout() {
 		fmt.Println("Called the api")
 	case <-ctxWithTimeout.Done():
 		fmt.Println("oh no my timeout expired!", ctxWithTimeout.Err())
+	}
+}
+
+func exampleWithValues() {
+	type key int
+	const UserKey key = 0
+
+	ctx := context.Background()
+
+	ctxWithValue := context.WithValue(ctx, UserKey, "123")
+
+	if userId, ok := ctxWithValue.Value(UserKey).(string); ok {
+		fmt.Println("this is the userId", userId)
+	} else {
+		fmt.Println("this is a protected route - no userID found!")
 	}
 }
