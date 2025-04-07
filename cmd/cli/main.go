@@ -3,12 +3,16 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"time"
 )
 
 func main() {
 	//exampleTimeout()
-	exampleWithValues()
+	//exampleWithValues()
+
+	http.HandleFunc("/hello", helloHandler)
+	http.ListenAndServe(":8080", nil)
 }
 
 func exampleTimeout() {
@@ -54,5 +58,21 @@ func exampleWithValues() {
 		fmt.Println("this is the userId", userId)
 	} else {
 		fmt.Println("this is a protected route - no userID found!")
+	}
+}
+
+func helloHandler(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 4*time.Second)
+	defer cancel()
+
+	select {
+	case <-time.After(3 * time.Second):
+		fmt.Println("API Response!")
+		w.WriteHeader(http.StatusOK)
+		return
+	case <-ctx.Done():
+		fmt.Println("Oh no the context expired")
+		http.Error(w, "Request context expired", http.StatusInternalServerError)
+		return
 	}
 }
